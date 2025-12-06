@@ -1,0 +1,27 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# to read excel file data
+file_path=r'/content/fitbeat_test_data.xlsx'
+data=pd.read_excel(file_path)
+print(data.head())
+
+# Convert 'Gender' to numeric, coercing errors to NaN and fill NaN values with 1
+# Map 'Male' to 1, 'Female' to 0.
+gender_mapping = {'Male': 1, 'Female': 0}
+
+# Apply the mapping. Values not in the mapping (e.g., original NaN, or other strings) will result in NaN.
+data['Gender'] = data['Gender'].map(gender_mapping)
+
+# Fill any remaining NaN values with 2 (or another appropriate integer for 'unknown')
+# before converting to integer type.
+data['Gender'] = data['Gender'].fillna(2).astype(int)
+
+data['Heart_Beat_Per_Minute'] = pd.to_numeric(data['Heart_Beat_Per_Minute'], errors='coerce')
+# Corrected: Use 'subset' argument to specify the column for dropping NaN values
+data_cleaned = data.dropna(subset=['Heart_Beat_Per_Minute'])
+print(data_cleaned.head())
+
+
+

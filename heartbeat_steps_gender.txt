@@ -1,0 +1,64 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+import numpy as np
+
+
+
+file_path=r'/content/fitbeat_test_data.xlsx'
+df=pd.read_excel(file_path)
+# print(df.head())
+
+# Convert 'Heart_Beat_Per_Minute' and 'Steps' to numeric, coercing errors to NaN
+df['Heart_Beat_Per_Minute'] = pd.to_numeric(df['Heart_Beat_Per_Minute'], errors='coerce')
+df['Steps'] = pd.to_numeric(df['Steps'], errors='coerce')
+
+# Clean and create 'Gender_code' based on previous cell's logic
+df['Gender'] = df['Gender'].astype(str).str.strip().str.replace(r'[\u200b\u200c\u200d\u200a0]','',regex=True).str.lower()
+gender_mapping = {'male': 1, 'm':1,'female': 0,'f':0}
+df['Gender_code'] = df['Gender'].map(gender_mapping).fillna(2).astype(int) # Fill NaNs for unknown genders with 2
+
+# Drop rows where essential features for the model are NaN
+df_cleaned = df.dropna(subset=['Heart_Beat_Per_Minute', 'Steps'])
+
+# Features and labels
+X = df_cleaned[["Steps", "Heart_Beat_Per_Minute"]]
+y = df_cleaned["Gender_code"]
+
+
+# 2. Train-test split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42
+)
+
+
+# 3. Scale features
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# 4. Train model
+
+model = LogisticRegression()
+model.fit(X_train_scaled, y_train)
+
+
+# 5. Evaluate
+
+y_pred = model.predict(X_test_scaled)
+print("Accuracy:", accuracy_score(y_test, y_pred))
+
+
+# 6. Predict new sample
+
+new_person = pd.DataFrame({"Steps": [8000],
+                           "Heart_Beat_Per_Minute": [76]})
+
+new_scaled = scaler.transform(new_person)
+prediction = model.predict(new_scaled)
+
+print("Predicted gender:", prediction[0])

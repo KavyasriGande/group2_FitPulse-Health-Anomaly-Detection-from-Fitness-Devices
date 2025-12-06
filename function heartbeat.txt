@@ -1,0 +1,22 @@
+import pandas as pd
+file_path=r'/content/fitbeat_test_data.xlsx'
+data=pd.read_excel(file_path)
+print(data.head())
+
+def heartbeat_status(hb):
+    if pd.isna(hb):
+        return "unknown"
+    elif hb < 60:
+        return "low"
+    elif 60 <= hb <=100:
+        return "Normal"
+    else:
+        return "high"
+
+# Convert 'Heart_Beat_Per_Minute' to numeric, coercing errors to NaN
+data['Heart_Beat_Per_Minute'] = pd.to_numeric(data['Heart_Beat_Per_Minute'], errors='coerce')
+
+data["Heartbeat_status"] = data["Heart_Beat_Per_Minute"].apply(heartbeat_status)
+
+
+print(data[["Heart_Beat_Per_Minute","Heartbeat_status"]].head(10))
